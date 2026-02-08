@@ -2,6 +2,7 @@ package com.zipporah.game;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -15,16 +16,21 @@ public class Main implements ApplicationListener {
     Texture background;
 
     // character animations
-    Texture spriteSheet;
     TextureRegion currFrame;
+
+    Texture walkSpriteSheet;
     Animation<TextureRegion> walk;
+
     Animation<TextureRegion> run;
     Animation<TextureRegion> jump;
+
+    Texture idleSpriteSheet;
     Animation<TextureRegion> idle;
 
     float time = 0;
-    float x = 200;
+    float x = 0;
     float y = 150;
+    float spriteSpeed = 200.0f;
 
     // camera
     FitViewport viewport;
@@ -44,9 +50,18 @@ public class Main implements ApplicationListener {
         // background
         background = new Texture("Battleground2.png");
 
+        // idle sprite sheet
+        idleSpriteSheet = new Texture("Idle.png");
+        TextureRegion[][] tmp2 = TextureRegion.split(idleSpriteSheet, 128, 128);
+        TextureRegion[] idleFrames = new TextureRegion[5];
+        for (int i = 0; i < 5; i++) {
+            idleFrames[i] = tmp2[0][i];
+        }
+        idle = new Animation<>(0.1f, idleFrames);
+
         // walk sprite sheet
-        spriteSheet = new Texture("Walk.png");
-        TextureRegion[][] tmp = TextureRegion.split(spriteSheet, 128, 128);
+        walkSpriteSheet = new Texture("Walk.png");
+        TextureRegion[][] tmp = TextureRegion.split(walkSpriteSheet, 128, 128);
         TextureRegion[] walkFrames = new TextureRegion[6];
         for (int i = 0; i < 6; i++) {
             walkFrames[i] = tmp[0][i];
@@ -75,6 +90,20 @@ public class Main implements ApplicationListener {
     }
 
     private void input() {
+        // default frame idle
+        currFrame = idle.getKeyFrame(time, true);
+        boolean isWalking = false;
+
+        float delta = Gdx.graphics.getDeltaTime();
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            x += delta * spriteSpeed;
+            currFrame = walk.getKeyFrame(time, true);
+            isWalking = true;
+        }
+
+        if (!isWalking) {
+            currFrame = idle.getKeyFrame(time, true);
+        }
 
     }
 
@@ -83,7 +112,6 @@ public class Main implements ApplicationListener {
         float worldHeight = viewport.getWorldHeight();
 
         time += Gdx.graphics.getDeltaTime();
-        currFrame = walk.getKeyFrame(time, true);
 
     }
 
