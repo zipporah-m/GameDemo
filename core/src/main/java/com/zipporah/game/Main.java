@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import static jdk.internal.icu.lang.UCharacter.getDirection;
+
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main implements ApplicationListener {
     Texture background;
@@ -21,11 +23,17 @@ public class Main implements ApplicationListener {
     Texture walkSpriteSheet;
     Animation<TextureRegion> walk;
 
-    Animation<TextureRegion> run;
+    // Animation<TextureRegion> run;
+
+    Texture jumpSpriteSheet;
     Animation<TextureRegion> jump;
 
     Texture idleSpriteSheet;
     Animation<TextureRegion> idle;
+
+    // Animation<TextureRegion> reversedWalkFrame;
+
+    // Attack 1 with Blood Charge 2
 
     float time = 0;
     float x = 0;
@@ -68,6 +76,16 @@ public class Main implements ApplicationListener {
         }
         walk = new Animation<>(0.1f, walkFrames);
 
+        // reversed walk
+
+        //jump spritesheet
+        jumpSpriteSheet = new Texture("Jump.png");
+        TextureRegion[][] tmp3 = TextureRegion.split(jumpSpriteSheet, 128, 128);
+        TextureRegion[] jumpFrames = new TextureRegion[6];
+        for (int i = 0; i < 6; i++) {
+            jumpFrames[i] = tmp3[0][i];
+        }
+        jump = new Animation<>(0.075f, jumpFrames);
     }
 
     @Override
@@ -93,17 +111,35 @@ public class Main implements ApplicationListener {
         // default frame idle
         currFrame = idle.getKeyFrame(time, true);
         boolean isWalking = false;
+        boolean flip = (Gdx.input.isKeyPressed(Input.Keys.A));
 
+        float width = currFrame.getRegionWidth();
+        float height = currFrame.getRegionHeight();
         float delta = Gdx.graphics.getDeltaTime();
+
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             x += delta * spriteSpeed;
             currFrame = walk.getKeyFrame(time, true);
             isWalking = true;
         }
-
-        if (!isWalking) {
-            currFrame = idle.getKeyFrame(time, true);
+        if (flip) {
+            x -= delta  * spriteSpeed;
         }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            float prev = y;
+            y += delta * spriteSpeed;
+            currFrame = jump.getKeyFrame(time, true);
+            y = prev;
+        }
+
+        // GUI FOR MENU
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+        }
+
+//        if (!isWalking) {
+//            currFrame = idle.getKeyFrame(time, true);
+//        }
 
     }
 
@@ -134,6 +170,7 @@ public class Main implements ApplicationListener {
     @Override
     public void pause() {
         // Invoked when your application is paused.
+
     }
 
     @Override
